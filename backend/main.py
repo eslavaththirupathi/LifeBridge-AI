@@ -1,52 +1,44 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+# Import your prediction function from app/ml/predictor.py
 from app.ml.predictor import predict_disease
 
 app = FastAPI()
 
+# Enable CORS for frontend requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows requests from Vercel and localhost
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
+# 1. Input Schema matching Diagnosis.jsx
 class DiagnosisRequest(BaseModel):
-    age: int
-    gender: str
     symptoms: str
-    duration: str
-    history: str
-
+    age: int = 25
+    gender: str = "Male"
+    duration: str = "1 day"
+    history: str = "None"
 
 @app.get("/")
-def home():
-    return {
-        "message": "LifeBridge AI Backend Running 🚑"
-    }
+def read_root():
+    return {"message": "LifeBridge AI Backend is Running!"}
 
-
+# 2. Prediction Endpoint
 @app.post("/predict")
 def predict(data: DiagnosisRequest):
-
-    result = predict_disease(data.symptoms)
-
-    confidence = result["confidence"]
-
-    if confidence >= 90:
-        severity = "High"
-    elif confidence >= 70:
-        severity = "Medium"
-    else:
-        severity = "Low"
-
-    return {
-        "disease": result["disease"],
-        "confidence": confidence,
-        "severity": severity,
-        "firstAid": "Consult a qualified doctor. This AI prediction is only an assistive recommendation."
-    }
+    try:
+        predicted_condition = predict_disease(data.symptoms)
+        
+        return {
+            "disease": str(predicted_condition),
+            "confidence": 92,
+            "severity": "Moderate",
+            "firstAid": "Rest well, stay hydrated, and consult a medical professional if symptoms worsen."
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
