@@ -1,25 +1,39 @@
-# Python
+# Python bytecode & cache
 __pycache__/
 *.py[cod]
+*$py.class
 
 # Virtual environments
 .venv/
 venv/
 backend/venv/
 
-# Node
+# Node dependencies
+node_modules/
 frontend/node_modules/
 
-#for dataset_model
+# ML Model Pickles (Ignored because of large file size)
 *.pkl
 backend/app/ml/disease_model.pkl
 
-# Environment variables
-.env
-    
-# VS Code
-.vscode/
+# ALWAYS TRACK DATASET FILES (DO NOT IGNORE CSVs)
+!backend/app/ml/dataset/Training.csv
+!backend/app/ml/dataset/Testing.csv
 
-# OS files
+# Environment variables & secrets
+.env
+.env.local
+.env.development.local
+.env.production.local
+
+# IDE & Editor settings
+.vscode/
+.idea/
+
+# OS generated files
 .DS_Store
 Thumbs.db
+
+# Build outputs
+dist/
+build/
