@@ -5,7 +5,8 @@ import gdown
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "disease_model.pkl")
 GDRIVE_FILE_ID = "1YOV-dXHdRHY6KqTjTWoETQOlU5WbZmbX"
 
-model = None  # Do not load immediately on boot
+# Set model variable to None globally
+model = None
 
 def get_model():
     global model
@@ -17,6 +18,5 @@ def get_model():
     return model
 
 def predict_disease(symptoms):
-    loaded_model = get_model()
-    # run prediction using loaded_model
-    ...
+    active_model = get_model() # Loads lazily
+    # perform prediction using active_model
