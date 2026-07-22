@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+backend/venv/
+
+# Node
+frontend/node_modules/
+
+#for dataset_model
+*.pkl
+backend/app/ml/disease_model.pkl
+
+# Environment variables
+.env
+    
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
