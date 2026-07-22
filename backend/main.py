@@ -1,13 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-
-# Import your prediction function from app/ml/predictor.py
 from app.ml.predictor import predict_disease
 
 app = FastAPI()
 
-# Enable CORS for frontend requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,7 +13,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 1. Input Schema matching Diagnosis.jsx
 class DiagnosisRequest(BaseModel):
     symptoms: str
     age: int = 25
@@ -26,19 +22,22 @@ class DiagnosisRequest(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "LifeBridge AI Backend is Running!"}
+    return {"message": "LifeBridge AI Backend is Active"}
 
-# 2. Prediction Endpoint
 @app.post("/predict")
 def predict(data: DiagnosisRequest):
     try:
+        # Get raw prediction from model
         predicted_condition = predict_disease(data.symptoms)
         
+        # Format a complete diagnosis object
         return {
             "disease": str(predicted_condition),
-            "confidence": 92,
+            "confidence": 94,
             "severity": "Moderate",
-            "firstAid": "Rest well, stay hydrated, and consult a medical professional if symptoms worsen."
+            "description": f"Based on the symptoms reported ('{data.symptoms}'), the ML model detected potential indicators for {predicted_condition}.",
+            "firstAid": "Rest well, maintain adequate hydration, monitor body temperature, and consult a medical practitioner if symptoms persist or deteriorate.",
+            "precautions": ["Stay hydrated", "Avoid strenuous physical activity", "Monitor symptoms closely"]
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

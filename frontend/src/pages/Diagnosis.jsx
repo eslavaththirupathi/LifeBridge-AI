@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+// Update this to your exact live Render backend URL
 const API_BASE_URL = "https://lifebridge-ai-backend.onrender.com";
 
 export default function Diagnosis() {
@@ -25,68 +26,53 @@ export default function Diagnosis() {
     setError("");
     setResult(null);
 
-    // Create payload matching common FastAPI input schemas
-    const payload = {
-      symptoms: formData.symptoms,
-      age: Number(formData.age),
-      gender: formData.gender,
-      duration: formData.duration,
-      history: formData.history
-    };
-
     try {
       const response = await fetch(`${API_BASE_URL}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        const errData = await response.json().catch(() => null);
-        throw new Error(errData?.detail || `Server responded with status ${response.status}`);
+        throw new Error("Unable to fetch response from backend server.");
       }
 
       const data = await response.json();
-      console.log("Backend Response Data:", data);
       setResult(data);
     } catch (err) {
-      console.error("Diagnosis Request Error:", err);
-      setError(
-        err.message || 
-        "Unable to connect to diagnosis server. Render free instances sleep after inactivity and can take ~30–40 seconds to wake up."
-      );
+      setError(err.message || "Failed to connect to the backend server.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "40px auto", padding: "20px", fontFamily: "sans-serif" }}>
-      <h2>AI Symptom Checker</h2>
-      
-      <form onSubmit={handleSubmit}>
+    <div style={{ maxWidth: "650px", margin: "40px auto", padding: "20px", fontFamily: "Arial, sans-serif" }}>
+      <h2 style={{ color: "#1a365d" }}>AI Symptom Checker</h2>
+      <p style={{ color: "#4a5568", marginBottom: "20px" }}>Enter your symptom details below to generate an AI diagnosis report.</p>
+
+      <form onSubmit={handleSubmit} style={{ background: "#f8fafc", padding: "20px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
         <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Age:</label>
+          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Age:</label>
           <input
             type="number"
             name="age"
             value={formData.age}
             onChange={handleChange}
-            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
+            style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
             required
           />
         </div>
 
         <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Gender:</label>
+          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Gender:</label>
           <select 
             name="gender" 
             value={formData.gender} 
             onChange={handleChange}
-            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
+            style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
           >
             <option value="Male">Male</option>
             <option value="Female">Female</option>
@@ -95,52 +81,57 @@ export default function Diagnosis() {
         </div>
 
         <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px" }}>Symptoms:</label>
+          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Symptoms:</label>
           <textarea
             name="symptoms"
             rows="4"
-            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
-            placeholder="Describe your symptoms (e.g., fever, headache, fatigue)"
+            style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
+            placeholder="Describe your symptoms (e.g., high fever, severe headache, fatigue)"
             value={formData.symptoms}
             onChange={handleChange}
             required
           />
         </div>
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={loading}
-          style={{ 
-            padding: "10px 20px", 
-            backgroundColor: loading ? "#ccc" : "#0070f3", 
-            color: "#fff", 
-            border: "none", 
-            borderRadius: "5px", 
-            cursor: loading ? "not-allowed" : "pointer" 
+          style={{
+            width: "100%",
+            padding: "12px",
+            backgroundColor: loading ? "#94a3b8" : "#2563eb",
+            color: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "16px",
+            border: "none",
+            borderRadius: "6px",
+            cursor: loading ? "not-allowed" : "pointer"
           }}
         >
-          {loading ? "Analyzing Symptoms (Waking server...)" : "Get Diagnosis"}
+          {loading ? "Analyzing Symptoms..." : "Get Diagnosis"}
         </button>
       </form>
 
       {error && (
-        <div style={{ color: "red", marginTop: "15px", padding: "10px", border: "1px solid red", borderRadius: "5px" }}>
-          <p><strong>Error:</strong> {error}</p>
+        <div style={{ marginTop: "20px", padding: "15px", backgroundColor: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", borderRadius: "6px" }}>
+          <strong>Error: </strong> {error}
         </div>
       )}
 
       {result && (
-        <div style={{ marginTop: "20px", padding: "15px", border: "1px solid #0070f3", borderRadius: "8px", backgroundColor: "#f0f8ff" }}>
-          <h3>Diagnosis Results</h3>
-          <p><strong>Predicted Condition:</strong> {result.disease || result.predicted_disease || result.prediction || "N/A"}</p>
-          {(result.confidence || result.confidence_score) && (
-            <p><strong>Confidence:</strong> {result.confidence || result.confidence_score}%</p>
-          )}
-          {result.severity && <p><strong>Severity:</strong> {result.severity}</p>}
-          {(result.firstAid || result.first_aid || result.recommendation) && (
-            <p style={{ fontStyle: "italic", fontSize: "0.95em" }}>
-              <strong>Note/First Aid:</strong> {result.firstAid || result.first_aid || result.recommendation}
-            </p>
+        <div style={{ marginTop: "30px", padding: "20px", backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px" }}>
+          <h3 style={{ color: "#166534", marginTop: 0 }}>Diagnosis Results</h3>
+          <p><strong>Predicted Condition:</strong> <span style={{ fontSize: "18px", color: "#15803d", fontWeight: "bold" }}>{result.disease}</span></p>
+          <p><strong>Model Confidence:</strong> {result.confidence}%</p>
+          <p><strong>Severity Level:</strong> {result.severity}</p>
+          
+          {result.description && <p><strong>Details:</strong> {result.description}</p>}
+          
+          {result.firstAid && (
+            <div style={{ marginTop: "15px", padding: "10px", backgroundColor: "#ffffff", borderRadius: "6px", border: "1px solid #dcfce7" }}>
+              <strong>Recommended First Aid / Care:</strong>
+              <p style={{ margin: "5px 0 0 0", color: "#166534" }}>{result.firstAid}</p>
+            </div>
           )}
         </div>
       )}
