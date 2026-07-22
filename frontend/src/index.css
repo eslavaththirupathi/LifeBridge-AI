@@ -1,1 +1,96 @@
 @import "tailwindcss";
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  font-family:Inter,Arial,sans-serif;
+  background:#f8fafc;
+}
+
+/* NAVBAR */
+
+.navbar{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:white;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+
+.navbar-container{
+  max-width:1200px;
+  margin:auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 30px;
+}
+
+.logo{
+  text-decoration:none;
+  font-size:24px;
+  font-weight:700;
+  color:#2563eb;
+}
+
+.nav-menu{
+  display:flex;
+  gap:28px;
+  align-items:center;
+}
+
+.nav-menu a{
+  text-decoration:none;
+  color:#334155;
+  font-weight:500;
+  transition:.3s;
+}
+
+.nav-menu a:hover{
+  color:#2563eb;
+}
+
+.diagnosis-btn{
+  background:#2563eb;
+  color:white!important;
+  padding:10px 18px;
+  border-radius:8px;
+  transition:.3s;
+}
+
+.diagnosis-btn:hover{
+  background:#1d4ed8;
+}
+
+.hamburger{
+  display:none;
+  font-size:28px;
+  cursor:pointer;
+}
+
+@media(max-width:768px){
+
+.nav-menu{
+position:absolute;
+top:75px;
+left:0;
+width:100%;
+background:white;
+flex-direction:column;
+padding:25px 0;
+display:none;
+box-shadow:0 6px 10px rgba(0,0,0,.1);
+}
+
+.nav-menu.active{
+display:flex;
+}
+
+.hamburger{
+display:block;
+}
+
+}
