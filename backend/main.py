@@ -4,14 +4,11 @@ from pydantic import BaseModel
 
 from app.ml.predictor import predict_disease
 
-app = FastAPI(
-    title="LifeBridge AI API",
-    version="1.0.0"
-)
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows requests from Vercel or any frontend domain
+    allow_origins=["*"],  # Allows requests from Vercel and localhost
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
