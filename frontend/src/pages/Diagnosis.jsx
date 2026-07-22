@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-// Update this to your exact live Render backend URL
 const API_BASE_URL = "https://lifebridge-ai-backend.onrender.com";
 
 export default function Diagnosis() {
@@ -9,7 +8,7 @@ export default function Diagnosis() {
     gender: "Male",
     symptoms: "",
     duration: "1 day",
-    history: "None"
+    history: "None",
   });
 
   const [result, setResult] = useState(null);
@@ -17,11 +16,15 @@ export default function Diagnosis() {
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setLoading(true);
     setError("");
     setResult(null);
@@ -36,105 +39,198 @@ export default function Diagnosis() {
       });
 
       if (!response.ok) {
-        throw new Error("Unable to fetch response from backend server.");
+        throw new Error("Backend server is not responding.");
       }
 
       const data = await response.json();
+
       setResult(data);
     } catch (err) {
-      setError(err.message || "Failed to connect to the backend server.");
+      setError(err.message || "Unable to connect to backend.");
     } finally {
       setLoading(false);
     }
   };
 
+  const severityColor = () => {
+    if (!result) return "#2563eb";
+
+    if (result.severity === "High") return "#dc2626";
+
+    if (result.severity === "Moderate") return "#f59e0b";
+
+    return "#16a34a";
+  };
+
   return (
-    <div style={{ maxWidth: "650px", margin: "40px auto", padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h2 style={{ color: "#1a365d" }}>AI Symptom Checker</h2>
-      <p style={{ color: "#4a5568", marginBottom: "20px" }}>Enter your symptom details below to generate an AI diagnosis report.</p>
+    <div
+      style={{
+        maxWidth: "750px",
+        margin: "40px auto",
+        padding: "25px",
+        fontFamily: "Arial",
+      }}
+    >
+      <h1 style={{ color: "#1d4ed8" }}>
+        🩺 AI Disease Prediction
+      </h1>
 
-      <form onSubmit={handleSubmit} style={{ background: "#f8fafc", padding: "20px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Age:</label>
-          <input
-            type="number"
-            name="age"
-            value={formData.age}
-            onChange={handleChange}
-            style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
-            required
-          />
-        </div>
+      <p style={{ color: "#555" }}>
+        Enter symptoms separated by commas.
+      </p>
 
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Gender:</label>
-          <select 
-            name="gender" 
-            value={formData.gender} 
-            onChange={handleChange}
-            style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
-          >
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          background: "#fff",
+          padding: 20,
+          borderRadius: 12,
+          boxShadow: "0 0 10px rgba(0,0,0,.1)",
+        }}
+      >
+        <input
+          type="number"
+          name="age"
+          value={formData.age}
+          onChange={handleChange}
+          placeholder="Age"
+          style={inputStyle}
+        />
 
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Symptoms:</label>
-          <textarea
-            name="symptoms"
-            rows="4"
-            style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
-            placeholder="Describe your symptoms (e.g., high fever, severe headache, fatigue)"
-            value={formData.symptoms}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        <select
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          style={inputStyle}
+        >
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+
+        <textarea
+          name="symptoms"
+          rows="5"
+          placeholder="Example: fever,cough,headache"
+          value={formData.symptoms}
+          onChange={handleChange}
+          style={inputStyle}
+          required
+        />
 
         <button
-          type="submit"
+          style={buttonStyle}
           disabled={loading}
-          style={{
-            width: "100%",
-            padding: "12px",
-            backgroundColor: loading ? "#94a3b8" : "#2563eb",
-            color: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "16px",
-            border: "none",
-            borderRadius: "6px",
-            cursor: loading ? "not-allowed" : "pointer"
-          }}
         >
-          {loading ? "Analyzing Symptoms..." : "Get Diagnosis"}
+          {loading ? "Analyzing..." : "Get Diagnosis"}
         </button>
       </form>
 
       {error && (
-        <div style={{ marginTop: "20px", padding: "15px", backgroundColor: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", borderRadius: "6px" }}>
-          <strong>Error: </strong> {error}
+        <div
+          style={{
+            marginTop: 20,
+            color: "red",
+            fontWeight: "bold",
+          }}
+        >
+          {error}
         </div>
       )}
 
       {result && (
-        <div style={{ marginTop: "30px", padding: "20px", backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px" }}>
-          <h3 style={{ color: "#166534", marginTop: 0 }}>Diagnosis Results</h3>
-          <p><strong>Predicted Condition:</strong> <span style={{ fontSize: "18px", color: "#15803d", fontWeight: "bold" }}>{result.disease}</span></p>
-          <p><strong>Model Confidence:</strong> {result.confidence}%</p>
-          <p><strong>Severity Level:</strong> {result.severity}</p>
-          
-          {result.description && <p><strong>Details:</strong> {result.description}</p>}
-          
-          {result.firstAid && (
-            <div style={{ marginTop: "15px", padding: "10px", backgroundColor: "#ffffff", borderRadius: "6px", border: "1px solid #dcfce7" }}>
-              <strong>Recommended First Aid / Care:</strong>
-              <p style={{ margin: "5px 0 0 0", color: "#166534" }}>{result.firstAid}</p>
-            </div>
+        <div
+          style={{
+            marginTop: 30,
+            padding: 20,
+            borderRadius: 12,
+            background: "#f8fafc",
+            boxShadow: "0 0 10px rgba(0,0,0,.08)",
+          }}
+        >
+          <h2>Prediction Result</h2>
+
+          <h3 style={{ color: "#2563eb" }}>
+            {result.disease}
+          </h3>
+
+          <p>
+            <strong>Confidence:</strong>{" "}
+            {result.confidence}%
+          </p>
+
+          <div
+            style={{
+              width: "100%",
+              background: "#ddd",
+              borderRadius: 20,
+              overflow: "hidden",
+              marginBottom: 20,
+            }}
+          >
+            <div
+              style={{
+                width: `${result.confidence}%`,
+                height: 12,
+                background: "#2563eb",
+              }}
+            />
+          </div>
+
+          <p>
+            <strong>Severity:</strong>{" "}
+            <span
+              style={{
+                color: severityColor(),
+                fontWeight: "bold",
+              }}
+            >
+              {result.severity}
+            </span>
+          </p>
+
+          <p>
+            <strong>Description:</strong>
+          </p>
+
+          <p>{result.description}</p>
+
+          <h4>First Aid</h4>
+
+          <p>{result.firstAid}</p>
+
+          {result.precautions && (
+            <>
+              <h4>Precautions</h4>
+
+              <ul>
+                {result.precautions.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
       )}
     </div>
   );
 }
+
+const inputStyle = {
+  width: "100%",
+  padding: 12,
+  marginBottom: 15,
+  borderRadius: 8,
+  border: "1px solid #ccc",
+};
+
+const buttonStyle = {
+  width: "100%",
+  padding: 14,
+  border: "none",
+  borderRadius: 8,
+  background: "#2563eb",
+  color: "#fff",
+  fontWeight: "bold",
+  cursor: "pointer",
+};

@@ -6,26 +6,35 @@ from app.ml.predictor import predict_disease
 
 app = FastAPI(
     title="LifeBridge AI API",
-    version="1.0.0"
+    version="1.0.0",
+    description="AI-powered disease prediction backend for LifeBridge AI"
 )
 
-# 1. CORS Configuration: Allow requests from all origins (Fixes Vercel frontend connection)
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],      # Change to your Vercel URL later if desired
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 2. Input Request Schema (Matches what frontend sends)
-class DiagnosisRequest(BaseModel):
-    age: int = 25
-    gender: str = "Male"
-    symptoms: str
-    duration: str = "1 day"
-    history: str = "None"
 
+# -------------------------------
+# Request Model
+# -------------------------------
+
+class DiagnosisRequest(BaseModel):
+    age: int
+    gender: str
+    symptoms: str
+    duration: str
+    history: str
+
+
+# -------------------------------
+# Home API
+# -------------------------------
 
 @app.get("/")
 def home():
@@ -34,32 +43,50 @@ def home():
     }
 
 
+# -------------------------------
+# Prediction API
+# -------------------------------
+
 @app.post("/predict")
 def predict(data: DiagnosisRequest):
+
     try:
-        # Call predictor function
         result = predict_disease(data.symptoms)
 
-        # Handle prediction output dictionary
-        disease = result.get("disease", "Condition Analysis Required")
-        confidence = result.get("confidence", 85.0)
+        disease = result["disease"]
+        confidence = float(result["confidence"])
 
-        # Assign Severity dynamically based on model confidence
-        if confidence >= 90:
+        if confidence >= 85:
             severity = "High"
-        elif confidence >= 70:
-            severity = "Medium"
+        elif confidence >= 65:
+            severity = "Moderate"
         else:
             severity = "Low"
 
-        # Return structured JSON to React Frontend
         return {
             "disease": disease,
             "confidence": confidence,
             "severity": severity,
-            "firstAid": "Consult a qualified healthcare professional. This AI prediction is an assistive recommendation based on reported symptoms."
+
+            "description":
+                f"Based on the symptoms reported ('{data.symptoms}'), "
+                f"the AI model predicts the most probable condition as {disease}.",
+
+            "firstAid":
+                "Stay hydrated, get adequate rest, avoid self-medication, "
+                "and consult a qualified healthcare professional.",
+
+            "precautions": [
+                "Drink plenty of water",
+                "Take sufficient rest",
+                "Eat nutritious food",
+                "Monitor symptoms regularly",
+                "Consult a doctor if symptoms worsen"
+            ]
         }
 
     except Exception as e:
-        print(f"Prediction Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
